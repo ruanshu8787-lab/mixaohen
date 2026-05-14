@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mì Xào Hến — Player</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: -apple-system, sans-serif;
+  }
+  .cassette-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+  }
+  .cassette {
+    width: 300px;
+    background: #1a1a2e;
+    border-radius: 16px;
+    padding: 16px 18px 12px;
+    border: 2px solid #2d2d4a;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .cassette-label {
+    background: linear-gradient(135deg, #8a6fc4 0%, #6a52a8 50%, #b090e8 100%);
+    border-radius: 10px;
+    padding: 11px 14px 9px;
+    text-align: center;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cassette-label::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.04) 3px, rgba(255,255,255,0.04) 4px);
+  }
+  .label-side { font-size: 9px; font-weight: 500; letter-spacing: 0.2em; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 3px; }
+  .label-title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.03em; }
+  .label-artist { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+  .label-lines { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+  .label-line { height: 1.5px; background: rgba(255,255,255,0.3); border-radius: 1px; }
+  .label-line:nth-child(2) { width: 70%; margin: 0 auto; }
+  .label-line:nth-child(3) { width: 50%; margin: 0 auto; }
+
+  .reels-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 6px;
+    margin-bottom: 10px;
+  }
+  .reel {
+    width: 68px; height: 68px;
+    background: #0f0f1e;
+    border-radius: 50%;
+    border: 2px solid #2d2d4a;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .reel-inner {
+    width: 26px; height: 26px;
+    background: #1a1a2e; border-radius: 50%;
+    border: 1.5px solid #8a6fc4;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 2;
+  }
+  .reel-hub { width: 9px; height: 9px; background: #8a6fc4; border-radius: 50%; }
+  .reel-spoke {
+    position: absolute;
+    width: 1.5px; height: 20px;
+    background: #2d2d4a;
+    top: 50%; left: 50%;
+    transform-origin: 50% 100%;
+  }
+  .reel-spoke:nth-child(1) { transform: translateX(-50%) translateY(-100%) rotate(0deg); }
+  .reel-spoke:nth-child(2) { transform: translateX(-50%) translateY(-100%) rotate(60deg); }
+  .reel-spoke:nth-child(3) { transform: translateX(-50%) translateY(-100%) rotate(120deg); }
+  .reel-spoke:nth-child(4) { transform: translateX(-50%) translateY(-100%) rotate(180deg); }
+  .reel-spoke:nth-child(5) { transform: translateX(-50%) translateY(-100%) rotate(240deg); }
+  .reel-spoke:nth-child(6) { transform: translateX(-50%) translateY(-100%) rotate(300deg); }
+  .reel.spinning { animation: spin 2s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .tape-window {
+    width: 76px; height: 38px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 6px;
+    border: 1.5px solid #2d2d4a;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tape-line {
+    width: 56px; height: 2px;
+    background: #3a2a60; border-radius: 1px; position: relative;
+  }
+  .tape-line::before, .tape-line::after {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    background: #1a1a2e; border-radius: 50%;
+    border: 1px solid #2d2d4a;
+    top: 50%; transform: translateY(-50%);
+  }
+  .tape-line::before { left: 0; }
+  .tape-line::after { right: 0; }
+
+  .progress-section { margin-bottom: 10px; }
+  .progress-bar-wrap {
+    height: 3px; background: #2d2d4a;
+    border-radius: 2px; cursor: pointer; margin-bottom: 5px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8a6fc4, #b090e8);
+    border-radius: 2px; width: 0%;
+    transition: width 0.3s; position: relative;
+  }
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute; right: -4px; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 8px; background: #b090e8; border-radius: 50%;
+  }
+  .time-row {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: #5a4880; font-family: monospace;
+  }
+
+  .controls-row {
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+  }
+  .ctrl-btn {
+    background: none; border: none; cursor: pointer;
+    color: #5a4880; font-size: 18px; padding: 6px;
+    border-radius: 8px; line-height: 1;
+    transition: color 0.15s, background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ctrl-btn:hover { color: #b090e8; background: rgba(138,111,196,0.1); }
+  .ctrl-play {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #8a6fc4, #b090e8);
+    color: white; font-size: 15px;
+    box-shadow: 0 2px 12px rgba(138,111,196,0.5);
+  }
+  .ctrl-play:hover { color: white; opacity: 0.9; }
+
+  .vol-row {
+    display: flex; align-items: center; gap: 7px;
+    margin-top: 9px; justify-content: center;
+  }
+  .vol-row span { font-size: 13px; color: #5a4880; }
+  input[type=range] {
+    width: 80px; height: 3px;
+    -webkit-appearance: none; appearance: none;
+    background: #2d2d4a; border-radius: 2px; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 10px; height: 10px;
+    border-radius: 50%; background: #8a6fc4; cursor: pointer;
+  }
+  .cassette-holes {
+    display: flex; justify-content: space-between;
+    margin-top: 8px; padding: 0 4px;
+  }
+  .hole {
+    width: 10px; height: 5px;
+    background: #0a0a18; border-radius: 3px;
+    border: 1px solid #2d2d4a;
+  }
+</style>
+</head>
+<body>
+<div class="cassette-wrap">
+  <div class="cassette">
+
+    <div class="cassette-label">
+      <div class="label-side">Side A ◆</div>
+      <div class="label-title">Human Nature</div>
+      <div class="label-artist">Michael Jackson</div>
+      <div class="label-lines">
+        <div class="label-line"></div>
+        <div class="label-line"></div>
+        <div class="label-line"></div>
+      </div>
+    </div>
+
+    <div class="reels-row">
+      <div class="reel" id="reel-left">
+        <div class="reel-spoke"></div><div class="reel-spoke"></div><div class="reel-spoke"></div>
+        <div class="reel-spoke"></div><div class="reel-spoke"></div><div class="reel-spoke"></div>
+        <div class="reel-inner"><div class="reel-hub"></div></div>
+      </div>
+      <div class="tape-window"><div class="tape-line"></div></div>
+      <div class="reel" id="reel-right">
+        <div class="reel-spoke"></div><div class="reel-spoke"></div><div class="reel-spoke"></div>
+        <div class="reel-spoke"></div><div class="reel-spoke"></div><div class="reel-spoke"></div>
+        <div class="reel-inner"><div class="reel-hub"></div></div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-bar-wrap" id="prog-wrap">
+        <div class="progress-bar-fill" id="prog-fill"></div>
+      </div>
+      <div class="time-row">
+        <span id="cur-time">0:00</span>
+        <span id="tot-time">0:00</span>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <button class="ctrl-btn" id="btn-back"><i class="ti ti-player-skip-back"></i></button>
+      <button class="ctrl-btn ctrl-play" id="btn-play"><i class="ti ti-player-play" id="play-icon"></i></button>
+      <button class="ctrl-btn" id="btn-fwd"><i class="ti ti-player-skip-forward"></i></button>
+    </div>
+
+    <div class="vol-row">
+      <span><i class="ti ti-volume"></i></span>
+      <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8">
+      <span><i class="ti ti-volume-2"></i></span>
+    </div>
+
+    <div class="cassette-holes">
+      <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+      <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    </div>
+
+  </div>
+</div>
+
+<audio id="audio" src="https://odd-gray-zqxg9xzakw.edgeone.app/Michael%20Jackson%20-%20Thriller%20-%20Human%20Nature.mp3"></audio>
+
+<script>
+const audio = document.getElementById('audio');
+audio.volume = 0.8;
+const btnPlay = document.getElementById('btn-play');
+const playIcon = document.getElementById('play-icon');
+const progFill = document.getElementById('prog-fill');
+const progWrap = document.getElementById('prog-wrap');
+const curTime = document.getElementById('cur-time');
+const totTime = document.getElementById('tot-time');
+const reel1 = document.getElementById('reel-left');
+const reel2 = document.getElementById('reel-right');
+const vol = document.getElementById('vol');
+
+function fmt(s) {
+  s = Math.floor(s || 0);
+  return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60);
+}
+function setPlay(v) {
+  playIcon.className = v ? 'ti ti-player-pause' : 'ti ti-player-play';
+  reel1.classList.toggle('spinning', v);
+  reel2.classList.toggle('spinning', v);
+}
+
+btnPlay.addEventListener('click', () => {
+  if (audio.paused) { audio.play(); setPlay(true); }
+  else { audio.pause(); setPlay(false); }
+});
+document.getElementById('btn-back').addEventListener('click', () => {
+  audio.currentTime = Math.max(0, audio.currentTime - 10);
+});
+document.getElementById('btn-fwd').addEventListener('click', () => {
+  audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
+});
+vol.addEventListener('input', () => { audio.volume = parseFloat(vol.value); });
+audio.addEventListener('timeupdate', () => {
+  const pct = audio.duration ? (audio.currentTime / audio.duration * 100) : 0;
+  progFill.style.width = pct.toFixed(1) + '%';
+  curTime.textContent = fmt(audio.currentTime);
+  totTime.textContent = fmt(audio.duration);
+});
+audio.addEventListener('ended', () => setPlay(false));
+progWrap.addEventListener('click', (e) => {
+  if (!audio.duration) return;
+  const r = progWrap.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+});
+</script>
+</body>
+</html>
